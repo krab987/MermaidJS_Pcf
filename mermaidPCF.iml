@@ -4,6 +4,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/mermaid/generated" />
+      <excludeFolder url="file://$MODULE_DIR$/mermaidPCFSolution/bin" />
       <excludeFolder url="file://$MODULE_DIR$/mermaidPCFSolution/obj" />
       <excludeFolder url="file://$MODULE_DIR$/mermaidPCFSolution_Old/bin" />
       <excludeFolder url="file://$MODULE_DIR$/mermaidPCFSolution_Old/obj" />
