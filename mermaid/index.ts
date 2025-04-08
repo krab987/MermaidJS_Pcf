@@ -71,6 +71,8 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
      * @param context The entire property bag available to control via Context Object; It contains values as set up by the customizer mapped to names defined in the manifest, as well as utility functions
      */
     public updateView(context: ComponentFramework.Context<IInputs>): void {
+        console.log(this.getOutputs())
+
         // Add code to update control view
         const mermaidText = context.parameters.mermaid_text.raw == "" || context.parameters.mermaid_text.raw == null ? this.default_mermaid_text : context.parameters.mermaid_text.raw;
         const clicksEnabled = context.parameters.clicksEnabled.raw ?? true
@@ -108,6 +110,7 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
         // console.log(idSvgForRender)
         // console.log(this._container.id)
         // console.log(text)
+
 
         mermaid.render(idSvgForRender, text)
             .then( res => {
