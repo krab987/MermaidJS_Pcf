@@ -13,6 +13,7 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
     private maxWidth: number|null;
 
     private clickedItemName: string|null;
+    private idSvgForRender = "mermaid";
 
     //output
     private heightAuto: number;
@@ -24,42 +25,7 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
     constructor() {
         // Empty
     }
-    public updateMermaidView( text:string ) {
 
-        // const _obj = document.getElementById("mermaid2")!;
-        mermaid.render('mermaid', text)
-            .then( res => {
-                this._container.innerHTML = res.svg
-
-                // ✅ Enforce no max-width on rendered SVG manually
-                const svgEl = this._container.querySelector("svg") as SVGElement;
-                if (svgEl) {
-                    svgEl.style.maxWidth = "none";
-                    // svgEl.style.width = "100%";
-                    // svgEl.style.height = "auto";
-                }
-
-                // ✅ Add click listener to all nodes after rendering if clicks is enabled
-                if(this.clicksEnabled){
-                    const nodes = this._container.querySelectorAll(".node");
-                    nodes.forEach(node => {
-                        // Set pointer cursor on hover
-                        (node as HTMLElement).style.cursor = "pointer";
-
-                        node.addEventListener("click", () => {
-                            // Get the node id from the <g> tag or child element
-                            const nodeId = node.id || node.getAttribute("id") || "";
-                            // Store it in clickedItemName
-                            this.clickedItemName = nodeId.split("-")[1];
-
-                            // console.log("Clicked node ID:", this.clickedItemName);
-                        });
-                    });
-
-                }
-            })
-            .catch( e => console.log("e: " + e));
-    }
     /**
      * Used to initialize the control instance. Controls can kick off remote server calls and other initialization actions here.
      * Data-set values are not initialized here, use updateView.
@@ -92,10 +58,11 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
 
         this._container.appendChild(this.preElement);
         this._container.classList.add("mermaid")
-        // this._container.id = "mermaid2"
 
-        this.mermaidText = context.parameters.mermaid_text.raw == "" || context.parameters.mermaid_text.raw == null ? this.default_mermaid_text : context.parameters.mermaid_text.raw;
-        this.updateMermaidView( this.mermaidText)
+        // this.mermaidText = context.parameters.mermaid_text.raw == "" || context.parameters.mermaid_text.raw == null ? this.default_mermaid_text : context.parameters.mermaid_text.raw;
+        // this.updateMermaidView(this.mermaidText)
+
+        this.updateView(context)
     }
 
 
@@ -107,22 +74,73 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
         // Add code to update control view
         const mermaidText = context.parameters.mermaid_text.raw == "" || context.parameters.mermaid_text.raw == null ? this.default_mermaid_text : context.parameters.mermaid_text.raw;
         const clicksEnabled = context.parameters.clicksEnabled.raw ?? true
+        const idSvgForRender = context.parameters.idSvgForRender.raw ?? "mermaid"
 
-        if(this.mermaidText != mermaidText || this.clicksEnabled != clicksEnabled){
+        if(this.mermaidText !== mermaidText ||
+            this.clicksEnabled !== clicksEnabled ||
+            this.idSvgForRender !== idSvgForRender
+        ){
             // console.log(mermaidText)
-            this.updateMermaidView( mermaidText )
+            this._container.id = "#" + idSvgForRender
+            this.updateMermaidView( mermaidText, idSvgForRender)
+
             this.mermaidText = mermaidText
             this.clicksEnabled = clicksEnabled
+            this.idSvgForRender = idSvgForRender
         }
 
         const gEl = this._container.querySelector("g") as SVGGElement;
-        const gElHeight = gEl.getBoundingClientRect().height;
-        if(gElHeight !== null){
-            this.heightAuto = Math.floor(gElHeight) + 1
-            // console.log(this.heightAuto)
-            // console.log(this.getOutputs())
+        if (gEl) {
+            const gElHeight = gEl.getBoundingClientRect().height;
+            if (gElHeight !== null) {
+                this.heightAuto = Math.floor(gElHeight) + 1;
+            }
         }
 
+    }
+
+    /**
+     * Renders mermaid canvas
+     * @param text text for mermaid to generate with
+     * @param idSvgForRender id div for render mermaid in
+     */
+    public updateMermaidView( text:string, idSvgForRender:string ) {
+        // console.log(idSvgForRender)
+        // console.log(this._container.id)
+        // console.log(text)
+
+        mermaid.render(idSvgForRender, text)
+            .then( res => {
+                this._container.innerHTML = res.svg
+
+                // ✅ Enforce no max-width on rendered SVG manually
+                const svgEl = this._container.querySelector("svg") as SVGElement;
+                if (svgEl) {
+                    svgEl.style.maxWidth = "none";
+                    // svgEl.style.width = "100%";
+                    // svgEl.style.height = "auto";
+                }
+
+                // ✅ Add click listener to all nodes after rendering if clicks is enabled
+                if(this.clicksEnabled){
+                    const nodes = this._container.querySelectorAll(".node");
+                    nodes.forEach(node => {
+                        // Set pointer cursor on hover
+                        (node as HTMLElement).style.cursor = "pointer";
+
+                        node.addEventListener("click", () => {
+                            // Get the node id from the <g> tag or child element
+                            const nodeId = node.id || node.getAttribute("id") || "";
+                            // Store it in clickedItemName
+                            this.clickedItemName = nodeId.split("-")[1];
+
+                            // console.log("Clicked node ID:", this.clickedItemName);
+                        });
+                    });
+
+                }
+            })
+            .catch( e => console.log("e: " + e));
     }
 
     /**

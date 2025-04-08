@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="TPM.wiki" constructor="MermaidJS" version="0.0.9" display-name-key="mermaidJS" description-key=" " control-type="standard" >
+  <control namespace="TPM.wiki" constructor="MermaidJS" version="0.1.0" display-name-key="mermaidJS" description-key=" " control-type="standard" >
     <!--external-service-usage node declares whether this 3rd party PCF control is using external service or not, if yes, this control will be considered as premium and please also add the external domain it is using.
     If it is not using any external service, please set the enabled="false" and DO NOT add any domain below. The "enabled" will be false by default.
     Example1:
@@ -18,8 +18,9 @@
       -->
     </external-service-usage>
     <!-- property node identifies a specific, configurable piece of data that the control expects from CDS -->
-    <property name="mermaid_text" display-name-key="mermaid_text" description-key="mermaid_text" of-type="SingleLine.Text" usage="bound" required="true"> </property>
-    <property name="clicksEnabled" display-name-key="clicksEnabled" description-key="Controls whether the clicks is enabled" usage="bound" of-type="TwoOptions" required="false" />
+    <property name="mermaid_text" display-name-key="mermaid_text" description-key="mermaid_text" of-type="SingleLine.Text" default-value="" usage="bound" required="true"> </property>
+    <property name="idSvgForRender" display-name-key="idSvgForRender" description-key="idSvgForRender" of-type="SingleLine.Text" usage="bound" default-value="mermaid" required="false"> </property>
+    <property name="clicksEnabled" display-name-key="clicksEnabled" description-key="Controls whether the clicks is enabled" usage="bound" of-type="TwoOptions" default-value="True" required="false" />
 
     <property name="heightAuto" display-name-key="heightAuto" description-key="heightAuto" of-type="Whole.None" usage="output" />
     <property name="clickedNodeKey" display-name-key="clickedNodeKey" description-key="clickedNodeKey" of-type="SingleLine.Text" usage="output" />
