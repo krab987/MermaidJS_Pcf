@@ -18,6 +18,7 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
     //output
     private heightAuto: number;
     private clicksEnabled = true;
+    private _notifyOutputChanged: () => void;
 
     /**
      * Empty constructor.
@@ -40,6 +41,8 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
         state: ComponentFramework.Dictionary,
         container: HTMLDivElement
     ): void {
+        this._notifyOutputChanged = notifyOutputChanged;
+
         // ✅ Mermaid config: disable max-width
         mermaid.initialize({
             startOnLoad: false,
@@ -71,8 +74,6 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
      * @param context The entire property bag available to control via Context Object; It contains values as set up by the customizer mapped to names defined in the manifest, as well as utility functions
      */
     public updateView(context: ComponentFramework.Context<IInputs>): void {
-        console.log(this.getOutputs())
-
         // Add code to update control view
         const mermaidText = context.parameters.mermaid_text.raw == "" || context.parameters.mermaid_text.raw == null ? this.default_mermaid_text : context.parameters.mermaid_text.raw;
         const clicksEnabled = context.parameters.clicksEnabled.raw ?? true
@@ -94,11 +95,10 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
         const gEl = this._container.querySelector("g") as SVGGElement;
         if (gEl) {
             const gElHeight = gEl.getBoundingClientRect().height;
-            if (gElHeight !== null) {
-                this.heightAuto = Math.floor(gElHeight) + 1;
-            }
+            this.heightAuto = Math.floor(gElHeight) + 1;
+            this._notifyOutputChanged()
         }
-
+        // console.log(this.getOutputs())
     }
 
     /**
@@ -107,11 +107,6 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
      * @param idSvgForRender id div for render mermaid in
      */
     public updateMermaidView( text:string, idSvgForRender:string ) {
-        // console.log(idSvgForRender)
-        // console.log(this._container.id)
-        // console.log(text)
-
-
         mermaid.render(idSvgForRender, text)
             .then( res => {
                 this._container.innerHTML = res.svg
@@ -122,6 +117,14 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
                     svgEl.style.maxWidth = "none";
                     // svgEl.style.width = "100%";
                     // svgEl.style.height = "auto";
+                }
+
+                //set heightAuto
+                const gEl = this._container.querySelector("g") ;
+                if (gEl) {
+                    const gElHeight = gEl.getBoundingClientRect().height;
+                    this.heightAuto = Math.floor(gElHeight) + 1;
+                    this._notifyOutputChanged()
                 }
 
                 // ✅ Add click listener to all nodes after rendering if clicks is enabled
@@ -136,8 +139,10 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
                             const nodeId = node.id || node.getAttribute("id") || "";
                             // Store it in clickedItemName
                             this.clickedItemName = nodeId.split("-")[1];
+                            this._notifyOutputChanged()
 
                             // console.log("Clicked node ID:", this.clickedItemName);
+                            //console.log(this.getOutputs())
                         });
                     });
 
