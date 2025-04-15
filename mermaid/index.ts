@@ -8,7 +8,7 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
     // Reference to preElement HTMLPreElement
     private preElement: HTMLPreElement
 
-    private default_mermaid_text = "flowchart LR \n A[Christmas] -->|Get money| B(v2 No diagram type detected matching given configuration for text)\n B --> C{Let me think}\nC -->|One| D[Laptop]\nC -->|Two| E[iPhone]\nC -->|Three| F[fa:fa-car Car]"
+    private default_mermaid_text = "flowchart LR \n classDef NoClick stroke-width:1.5px, stroke:red\n A[Christmas] -->|Get money| B(Always noCLick\n No diagram type detected matching given configuration for text):::NoClick\n B --> C{Let me think}\nC -->|One| D[Laptop]\nC -->|Two| E[iPhone]\nC -->|Three| F[fa:fa-car Car]"
     private mermaidText: string;
     private maxWidth: number|null;
 
@@ -115,7 +115,7 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
                 const svgEl = this._container.querySelector("svg") as SVGElement;
                 if (svgEl) {
                     svgEl.style.maxWidth = "none";
-                    // svgEl.style.width = "100%";
+                    // svgEl.style.width = "99%";
                     // svgEl.style.height = "auto";
                 }
 
@@ -131,22 +131,37 @@ export class MermaidJS implements ComponentFramework.StandardControl<IInputs, IO
                 if(this.clicksEnabled){
                     const nodes = this._container.querySelectorAll(".node");
                     nodes.forEach(node => {
-                        // Set pointer cursor on hover
-                        (node as HTMLElement).style.cursor = "pointer";
+                        if(!node.classList.contains("NoClick")){
+                            // Set pointer cursor on hover
+                            (node as HTMLElement).style.cursor = "pointer";
+                            node.addEventListener("click", () => {
+                                // Get the node id from the <g> tag or child element
+                                const nodeId = node.id || node.getAttribute("id") || "";
+                                // Store it in clickedItemName
+                                this.clickedItemName = nodeId.split("-")[1];
+                                this._notifyOutputChanged()
 
-                        node.addEventListener("click", () => {
-                            // Get the node id from the <g> tag or child element
-                            const nodeId = node.id || node.getAttribute("id") || "";
-                            // Store it in clickedItemName
-                            this.clickedItemName = nodeId.split("-")[1];
-                            this._notifyOutputChanged()
-
-                            // console.log("Clicked node ID:", this.clickedItemName);
-                            //console.log(this.getOutputs())
-                        });
+                                // console.log("Clicked node ID:", this.clickedItemName);
+                                //console.log(this.getOutputs())
+                            });
+                        }
                     });
-
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        /* Apply hover effect only if .node does NOT have .NoClick */
+                        .node:not(.NoClick):hover rect,
+                        .node:not(.NoClick):hover ellipse,
+                        .node:not(.NoClick):hover polygon {
+                            filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.4));
+                            transition: filter 0.3s ease;
+                        }
+                    `;
+                    document.head.appendChild(style);
                 }
+
+
+
+
             })
             .catch( e => console.log("e: " + e));
     }
